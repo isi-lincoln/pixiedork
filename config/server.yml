@@ -1,0 +1,85 @@
+# configure our cumulus linux host as a switch
+---
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: wait until ssh is reachable
+      wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: install apt packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apache2
+        - inetutils-inetd
+        - dnsmasq
+
+    - name: copy network interfaces
+      copy:
+        src: iface.cfg
+        dest: /etc/network/interfaces
+
+    - name: bring up eth1
+      shell: ip addr del 10.0.0.1/24 dev eth1
+      ignore_errors: yes
+
+    - name: bring up eth1
+      shell: ip addr add 10.0.0.1/24 dev eth1
+
+    - name: take down eth1
+      shell: ip link set eth1 down
+      ignore_errors: yes
+
+    - name: bring up eth1
+      shell: ip link set eth1 up
+
+    - name: copy dnsmasq config
+      copy:
+        src: dnsmasq.cfg
+        dest: /etc/dnsmasq.conf
+
+    - name: make directory
+      file:
+        path: /srv/tftp/pxelinux.cfg/
+        state: directory
+
+    - name: copy sledc kernel to /srv/tftp
+      copy:
+        src: sledc/sledc-kernel
+        dest: /srv/tftp
+
+    - name: copy sledc initramfs to /srv/tftp
+      copy:
+        src: sledc/sledc-initramfs
+        dest: /srv/tftp
+
+    - name: copy all c32 to /srv/tftp
+      copy:
+        src: c32/
+        dest: /srv/tftp
+
+    - name: Make sure a service is running
+      systemd:
+        state: restarted
+        name: dnsmasq
+
+    - name: modify inetd options
+      copy:
+        src: inetd.cfg
+        dest: /etc/inetd.conf
+
+    - name: copy syslinux thingy
+      copy:
+        src: pxelinux.0
+        dest: /srv/tftp/pxelinux.0
+
+    - name: copy pxeboot config
+      copy:
+        src: pxelinux.cfg
+        dest: /srv/tftp/pxelinux.cfg/default
+
+

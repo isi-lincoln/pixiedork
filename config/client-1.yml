@@ -1,0 +1,13 @@
+# configure our cumulus linux host as a switch
+---
+- hosts: all
+
+  tasks:
+    - name: wait until ssh is reachable
+      wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: set mac address
+      shell: ip link set eth0 address 00:00:00:00:00:01
+      become: yes
