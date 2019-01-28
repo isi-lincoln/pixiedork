@@ -1,0 +1,37 @@
+From df7d97eb7b202412b99443694048ec0405fabed3 Mon Sep 17 00:00:00 2001
+From: Lincoln Thurlow <lincoln@isi.edu>
+Date: Mon, 28 Jan 2019 14:28:33 -0800
+Subject: [PATCH] nex-branch: local-test
+
+---
+ vars/main.yml | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/vars/main.yml b/vars/main.yml
+index 5ffd1c8..f49082a 100644
+--- a/vars/main.yml
++++ b/vars/main.yml
+@@ -5,15 +5,14 @@ bins:
+   coredns: https://build.mergetb.net/bin/coredns
+   dhcpd: https://build.mergetb.net/bin/nex-dhcpd
+ 
+-interface: "eth0"
++interface: "eth1"
+ nexd:
+   addr: 0.0.0.0
+   port: 6000
+ 
+ etcd:
+-  host: "db"
++  host: "localhost"
+   port: 2379
+-  cacert: /etc/nex/ca.pem
+-  cert: /etc/nex/db.pem
+-  key: /etc/nex/db-key.pem
+-
++  cacert: ""
++  cert: ""
++  key: ""
+-- 
+2.17.1
+
