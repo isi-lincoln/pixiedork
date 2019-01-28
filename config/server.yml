@@ -14,10 +14,10 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - apache2
         - inetutils-inetd
-        - dnsmasq
+        - tftpd-hpa
 
+# network configuration
     - name: copy network interfaces
       copy:
         src: iface.cfg
@@ -37,11 +37,7 @@
     - name: bring up eth1
       shell: ip link set eth1 up
 
-    - name: copy dnsmasq config
-      copy:
-        src: dnsmasq.cfg
-        dest: /etc/dnsmasq.conf
-
+# pxeboot configuration
     - name: make directory
       file:
         path: /srv/tftp/pxelinux.cfg/
@@ -65,7 +61,7 @@
     - name: Make sure a service is running
       systemd:
         state: restarted
-        name: dnsmasq
+        name: tftpd-hpa
 
     - name: modify inetd options
       copy:
@@ -82,4 +78,13 @@
         src: pxelinux.cfg
         dest: /srv/tftp/pxelinux.cfg/default
 
+# nex deployment
+    - name: make nex directory
+      file:
+        path: /etc/nex/
+        state: directory
 
+    - name: copy pxeboot config
+      copy:
+        src: nex.cfg
+        dest: /etc/nex/sled.yml

@@ -1,0 +1,3 @@
+[submodule "roles/nex"]
+	path = roles/nex
+	url = https://gitlab.com/mergetb/ansible/nex.git

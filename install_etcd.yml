@@ -1,0 +1,6 @@
+---
+
+- hosts: server
+  roles:
+    - database
+  become: yes

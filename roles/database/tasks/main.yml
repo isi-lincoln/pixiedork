@@ -1,0 +1,114 @@
+---
+
+- name: "apt-get update"
+  apt:
+    update_cache: yes
+  tags:
+    - database
+
+- name: clean up old etcd
+  file:
+    path: /root/etcd-v3.3.9-linux-amd64
+    state: absent
+
+- name: clean up old etcd
+  file:
+    path: /root/etcd-v3.3.9-linux-amd64.tar.gz
+    state: absent
+
+- name: wget etcd 3.3.9
+  get_url:
+    url: https://github.com/etcd-io/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz
+    dest: /root/etcd-v3.3.9-linux-amd64.tar.gz
+    checksum: sha256:7b95bdc6dfd1d805f650ea8f886fdae6e7322f886a8e9d1b0d14603767d053b1
+  become: yes
+  tags:
+    - database
+
+- name: Extract etcd
+  unarchive:
+    src: /root/etcd-v3.3.9-linux-amd64.tar.gz
+    dest: /root/
+    creates: /root/etcd-v3.3.9-linux-amd64
+    remote_src: yes
+  become: yes
+  tags:
+    - database
+
+- name: copy etcd to /usr/bin
+  copy:
+    src: /root/etcd-v3.3.9-linux-amd64/etcd
+    dest: /usr/bin/
+    mode: 0755
+    remote_src: yes
+  become: yes
+  tags:
+    - database
+
+- name: (fedora) copy etcdctl to /usr/bin
+  copy:
+    src: /root/etcd-v3.3.9-linux-amd64/etcdctl
+    dest: /usr/bin/
+    mode: 0755
+    remote_src: yes
+  become: yes
+  tags:
+    - database
+
+- name: stop database service
+  systemd:
+    state: started
+    enabled: False
+    name: etcd
+  ignore_errors: yes
+  tags:
+    - database
+
+- name: "kill etcd instances"
+  shell: killall etcd
+  become: yes
+  ignore_errors: yes
+  tags:
+    - database
+
+- name: remove etcd2 service install by apt
+  file:
+    path: /etc/systemd/system/etcd2.service
+    state: absent
+  become: yes
+  tags:
+    - database
+
+- name: copy systemd file to database
+  template:
+    src: roles/database/templates/etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    owner: root
+    group: root
+  become: yes
+  tags:
+    - database
+
+- name: start database (etcd) service
+  systemd:
+    state: started
+    enabled: True
+    name: etcd
+  tags:
+    - database
+
+- name: restart database (etcd) to pick up daemon changes
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: etcd
+  tags:
+    - database
+
+- name: "Destroy database if it exists"
+  shell: etcdctl del --prefix=true /
+  become: yes
+  environment:
+    ETCDCTL_API: 3
+  tags:
+    - database
