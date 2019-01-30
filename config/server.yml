@@ -14,8 +14,6 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - inetutils-inetd
-        - tftpd-hpa
         - tcpdump
 
 # network configuration
@@ -38,46 +36,21 @@
     - name: bring up eth1
       shell: ip link set eth1 up
 
-# pxeboot configuration
-    - name: make directory
-      file:
-        path: /srv/tftp/pxelinux.cfg/
-        state: directory
+# pxeboot-store container
 
-    - name: copy sledc kernel to /srv/tftp
-      copy:
-        src: sledc/sledc-kernel
-        dest: /srv/tftp
-
-    - name: copy sledc initramfs to /srv/tftp
-      copy:
-        src: sledc/sledc-initramfs
-        dest: /srv/tftp
-
-    - name: copy all c32 to /srv/tftp
-      copy:
-        src: c32/
-        dest: /srv/tftp
-
-    - name: Make sure a service is running
-      systemd:
-        state: restarted
-        name: tftpd-hpa
-
-    - name: modify inetd options
-      copy:
-        src: inetd.cfg
-        dest: /etc/inetd.conf
-
-    - name: copy syslinux thingy
-      copy:
-        src: pxelinux.0
-        dest: /srv/tftp/pxelinux.0
+    - name: install docker
+      script: get-docker.sh
 
     - name: copy pxeboot config
       copy:
-        src: pxelinux.cfg
-        dest: /srv/tftp/pxelinux.cfg/default
+        src: pxeboot.service
+        dest: /etc/systemd/system/pxeboot.service
+
+    - name: start container
+      systemd:
+        state: started
+        enabled: True
+        name: pxeboot
 
 # nex deployment
     - name: make nex directory

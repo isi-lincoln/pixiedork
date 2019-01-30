@@ -1,0 +1,14 @@
+[Unit]
+Description=Mergetb pxeboot
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=/usr/bin/docker pull quay.io/mergetb/pxeboot-store:latest
+ExecStart=/usr/bin/docker run \
+--restart=always -d --net=host \
+--name pxeboot-server \
+quay.io/mergetb/pxeboot-store:latest
+
+[Install]
+WantedBy=multi-user.target
