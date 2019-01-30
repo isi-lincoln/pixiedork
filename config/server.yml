@@ -16,6 +16,7 @@
       with_items:
         - inetutils-inetd
         - tftpd-hpa
+        - tcpdump
 
 # network configuration
     - name: copy network interfaces
