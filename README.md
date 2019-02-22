@@ -20,6 +20,11 @@ ansible-playbook -i .rvn/ansible_hostname config/server.yml
 Note: when we `rvn status` it will builds the ansible inventory file,
 this will become to the future method of configuration for raven.
 
+## Important
+
+Check other branches- if you want to use nex:
+`git checkout nex-pxestore`
+
 ## Run it
 
 ```
